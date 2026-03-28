@@ -124,11 +124,11 @@
         class="h-8 px-3 flex items-center justify-between bg-black/10 border-b border-white/10 select-none"
         style="cursor: {isDragging ? 'grabbing' : 'grab'};"
       >
-        <span class="text-sm font-medium text-white/90">{title}</span>
+        <span class="text-sm font-medium text-foreground/90">{title}</span>
         {#if showCloseButton}
           <button
             onclick={onClose}
-            class="w-5 h-5 flex items-center justify-center text-white/70 hover:text-white hover:bg-red-500/50 rounded-sm transition-colors"
+            class="w-5 h-5 flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-red-500/50 rounded-sm transition-colors"
             aria-label="Close window"
           >
             <X class="size-4" />
