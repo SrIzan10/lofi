@@ -6,6 +6,7 @@
   import Window from '../ui/window/window.svelte';
   import TodoList from './todo-list.svelte';
   import Twentytwentytwenty from './twentytwentytwenty.svelte';
+  import Pomodoro from './pomodoro.svelte';
 
   // svelte-ignore non_reactive_update
   let audioElement: HTMLAudioElement;
@@ -260,4 +261,16 @@
   show={appState.show202020}
 >
   <Twentytwentytwenty></Twentytwentytwenty>
+</Window>
+
+<Window
+  title="Pomodoro Timer"
+  showTitleBar={true}
+  showCloseButton={true}
+  width={320}
+  height={250}
+  onClose={() => appState.showPomodoro = false}
+  show={appState.showPomodoro}
+>
+  <Pomodoro></Pomodoro>
 </Window>
