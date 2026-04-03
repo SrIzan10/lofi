@@ -32,7 +32,7 @@ export const state = $state({
   restRuleTimer: 20,
 
   showPomodoro: false,
-  pomodoroTimer: 25 * 60,
+  pomodoroTimer: 20 * 60,
   pomodoroBreakTimer: 5 * 60,
   isPomodoroActive: false,
   pomodoroWorkPhase: true,

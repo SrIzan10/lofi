@@ -8,6 +8,13 @@
       "when": 1775242146068,
       "tag": "0000_wooden_magdalene",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1775242876895,
+      "tag": "0001_curved_sunspot",
+      "breakpoints": true
     }
   ]
 }

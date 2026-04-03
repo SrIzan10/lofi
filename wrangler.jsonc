@@ -24,7 +24,7 @@
       "binding": "DB",
       "database_name": "lofi_db",
       "database_id": "c8b599fc-88ce-4b55-b386-bfffe122d5f8",
-      "migrations_dir": "drizzle/migrations",
+      "migrations_dir": "drizzle",
     },
   ],
 }
