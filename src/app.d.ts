@@ -7,8 +7,12 @@ declare global {
     // interface PageData {}
     // interface PageState {}
     interface Platform {
-      caches: CacheStorage & { default: Cache }
-   }
+      caches: CacheStorage & { default: Cache };
+      env: Env;
+      ctx: ExecutionContext;
+      caches: CacheStorage;
+      cf?: IncomingRequestCfProperties
+    }
   }
 }
 
