@@ -14,6 +14,8 @@ import * as z from 'zod';
 const generateAccountNumber = () =>
   Array.from(crypto.getRandomValues(new Uint8Array(16)), (value) => (value % 10).toString()).join('');
 
+const generateOpaqueIdentifier = () => `${crypto.randomUUID()}@internal.invalid`;
+
 const accountNumber = () =>
   ({
     id: 'account-number',
@@ -35,17 +37,7 @@ const accountNumber = () =>
                 value: ctx.body.accountNumber,
               },
             ],
-          })) as
-            | ({
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                email: string;
-                emailVerified: boolean;
-                name: string;
-                image?: string | null;
-              } & Record<string, any>)
-            | null;
+          })) as (Record<string, any> | null);
 
           if (!user) {
             throw new APIError('UNAUTHORIZED', {
@@ -60,7 +52,10 @@ const accountNumber = () =>
             });
           }
 
-          await setSessionCookie(ctx, { session, user });
+          await setSessionCookie(
+            ctx,
+            { session, user } as Parameters<typeof setSessionCookie>[1],
+          );
 
           return ctx.json({
             token: session.token,
@@ -74,7 +69,6 @@ const accountNumber = () =>
 const authConfig = {
   baseURL: env.ORIGIN,
   secret: env.BETTER_AUTH_SECRET,
-  emailAndPassword: { enabled: false },
   user: {
     additionalFields: {
       accountNumber: {
@@ -98,7 +92,7 @@ const authConfig = {
   plugins: [
     anonymous({
       generateName: () => 'Chillhop listener',
-      emailDomainName: 'accounts.chillhop.local',
+      generateRandomEmail: generateOpaqueIdentifier,
     }),
     accountNumber(),
     passkey({
