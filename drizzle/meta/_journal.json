@@ -15,6 +15,13 @@
       "when": 1775242876895,
       "tag": "0001_curved_sunspot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1775246437951,
+      "tag": "0002_account_number_auth",
+      "breakpoints": true
     }
   ]
 }

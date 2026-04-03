@@ -21,51 +21,36 @@ export const load: PageServerLoad = (event) => {
 };
 
 export const actions: Actions = {
-  signInEmail: async (event) => {
+  signInAccountNumber: async (event) => {
     const { auth } = event.locals;
 
     const formData = await event.request.formData();
-    const email = formData.get('email')?.toString() ?? '';
-    const password = formData.get('password')?.toString() ?? '';
+    const accountNumber = formData.get('accountNumber')?.toString().replace(/\D/g, '') ?? '';
 
     try {
-      await auth.api.signInEmail({
+      await auth.api.signInAccountNumber({
         body: {
-          email,
-          password,
-          callbackURL: '/auth/verification-success',
+          accountNumber,
         },
       });
     } catch (error) {
-      console.error('Demo Better Auth sign-in failed', { email, error });
+      console.error('Demo Better Auth account number sign-in failed', { accountNumber, error });
       return fail(error instanceof APIError ? 400 : 500, {
-        message: getErrorMessage(error, 'Signin failed'),
+        message: getErrorMessage(error, 'Account number sign-in failed'),
       });
     }
 
     return redirect(302, '/demo/better-auth');
   },
-  signUpEmail: async (event) => {
+  createAccount: async (event) => {
     const { auth } = event.locals;
 
-    const formData = await event.request.formData();
-    const email = formData.get('email')?.toString() ?? '';
-    const password = formData.get('password')?.toString() ?? '';
-    const name = formData.get('name')?.toString() ?? '';
-
     try {
-      await auth.api.signUpEmail({
-        body: {
-          email,
-          password,
-          name,
-          callbackURL: '/auth/verification-success',
-        },
-      });
+      await auth.api.signInAnonymous();
     } catch (error) {
-      console.error('Demo Better Auth sign-up failed', { email, error });
+      console.error('Demo Better Auth account creation failed', { error });
       return fail(error instanceof APIError ? 400 : 500, {
-        message: getErrorMessage(error, 'Registration failed'),
+        message: getErrorMessage(error, 'Account creation failed'),
       });
     }
 
