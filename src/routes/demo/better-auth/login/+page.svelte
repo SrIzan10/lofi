@@ -31,7 +31,7 @@
 <form method="post" action="?/signInAccountNumber" use:enhance>
   <label>
     Account number
-    <input name="accountNumber" inputmode="numeric" maxlength="16" autocomplete="webauthn" />
+    <input name="accountNumber" inputmode="numeric" maxlength="16" autocomplete="one-time-code" />
   </label>
   <button>Sign in with account number</button>
   <button formaction="?/createAccount">Create account number</button>
