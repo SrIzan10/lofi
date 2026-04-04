@@ -168,31 +168,31 @@
       </Dialog.Title>
     </Dialog.Header>
     {#if user}
-      <div class="flex flex-col gap-4">
-        <div class="rounded-lg border border-foreground/10 bg-foreground/5 p-4">
+      <div class="flex flex-col gap-5">
+        <div class="rounded-xl border border-white/[0.1] bg-white/[0.04] backdrop-blur-sm p-4 shadow-lg">
           <div class="flex items-start gap-3">
-            <div class="rounded-full bg-foreground/10 p-2">
-              <UserRound class="size-4" />
+            <div class="rounded-full bg-white/10 p-2.5 backdrop-blur-sm">
+              <UserRound class="size-4 text-white/90" />
             </div>
             <div class="min-w-0">
-              <p class="font-medium">{user.name}</p>
-              <p class="text-sm opacity-70">Account #{user.accountNumber}</p>
+              <p class="font-medium text-white">{user.name}</p>
+              <p class="text-sm text-white/60">Account #{user.accountNumber}</p>
             </div>
           </div>
         </div>
 
         {#if passkeys.length > 0}
-          <div class="flex flex-col gap-2">
-            <p class="text-sm font-medium">Your passkeys</p>
-            <div class="flex flex-col gap-1">
+          <div class="flex flex-col gap-2.5">
+            <p class="text-sm font-medium text-white/80">Your passkeys</p>
+            <div class="flex flex-col gap-2">
               {#each passkeys as passkey (passkey.id)}
                 <div
-                  class="flex items-center gap-2 rounded-lg border border-foreground/10 bg-foreground/5 p-3"
+                  class="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-3 transition-colors hover:bg-white/[0.06]"
                 >
-                  <Key class="size-4" />
+                  <Key class="size-4 text-white/70" />
                   <div class="min-w-0 flex-1">
-                    <p>{passkey.name}</p>
-                    <p class="text-sm opacity-70">
+                    <p class="text-white/90">{passkey.name}</p>
+                    <p class="text-sm text-white/50">
                       Added on {new Date(passkey.createdAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -216,8 +216,8 @@
           </div>
         {/if}
 
-        <div class="flex flex-col gap-2">
-          <p class="text-sm font-medium">Security</p>
+        <div class="flex flex-col gap-2.5">
+          <p class="text-sm font-medium text-white/80">Security</p>
           <Input
             type="text"
             id="passkeyName"
@@ -228,16 +228,16 @@
             {busyAction === 'add-passkey' ? 'Waiting for passkey...' : 'Add a passkey'}
           </Button>
           {#if passkeyMessage}
-            <p class="text-sm opacity-80">{passkeyMessage}</p>
+            <p class="text-sm text-white/70 bg-white/[0.03] rounded-lg px-3 py-2 border border-white/[0.06]">{passkeyMessage}</p>
           {/if}
         </div>
 
-        <Button variant="ghost" onclick={signOut}>Sign out</Button>
+        <Button variant="ghost" onclick={signOut} class="text-white/70 hover:text-white hover:bg-white/10">Sign out</Button>
       </div>
     {:else}
-      <div class="flex flex-col gap-4 pt-4">
+      <div class="flex flex-col gap-4 pt-2">
         {#if authScreen === 'login'}
-          <div class="flex w-full flex-col gap-1.5">
+          <div class="flex w-full flex-col gap-2">
             <Label for="accountNumber">Account Number</Label>
             <div class="flex items-center gap-2">
               <Input
@@ -266,10 +266,10 @@
             {busyAction === 'account-number' ? 'Signing in...' : 'Sign in with account number'}
           </Button>
 
-          <div class="relative my-2 flex items-center gap-3">
-            <div class="h-px flex-1 bg-foreground/20"></div>
-            <span class="text-sm text-foreground/70">or</span>
-            <div class="h-px flex-1 bg-foreground/20"></div>
+          <div class="relative my-3 flex items-center gap-4">
+            <div class="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+            <span class="text-sm text-white/50">or</span>
+            <div class="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
           </div>
 
           <Button
@@ -281,17 +281,19 @@
             {busyAction === 'create-account' ? 'Creating account...' : 'Create account number'}
           </Button>
           {#if authMessage}
-            <p class="text-sm text-red-400">{authMessage}</p>
+            <p class="text-sm text-red-400/90 bg-red-500/10 rounded-lg px-3 py-2 border border-red-500/20">{authMessage}</p>
           {/if}
         {:else if authScreen === 'create'}
-          <Label for="name">Your name</Label>
-          <Input
-            type="text"
-            id="name"
-            bind:value={name}
-            placeholder="Steve Jobs"
-            autocomplete="name webauthn"
-          />
+          <div class="flex flex-col gap-2">
+            <Label for="name">Your name</Label>
+            <Input
+              type="text"
+              id="name"
+              bind:value={name}
+              placeholder="Steve Jobs"
+              autocomplete="name webauthn"
+            />
+          </div>
 
           <div class="flex w-full items-center gap-2">
             <Button

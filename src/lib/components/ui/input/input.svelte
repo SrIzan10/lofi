@@ -24,7 +24,13 @@
 	<input
 		bind:this={ref}
 		class={cn(
-			"border-input placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+			"flex h-10 w-full rounded-lg px-3 py-2 text-sm transition-all duration-200",
+			"bg-white/[0.06] dark:bg-black/20 backdrop-blur-sm",
+			"border border-white/[0.1] dark:border-white/[0.08]",
+			"placeholder:text-white/40 text-white",
+			"focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20",
+			"disabled:cursor-not-allowed disabled:opacity-50",
+			"file:border-0 file:bg-transparent file:text-sm file:font-medium",
 			className
 		)}
 		type="file"
@@ -36,7 +42,12 @@
 	<input
 		bind:this={ref}
 		class={cn(
-			"border-input placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+			"flex h-10 w-full rounded-lg px-3 py-2 text-sm transition-all duration-200",
+			"bg-white/[0.06] dark:bg-black/20 backdrop-blur-sm",
+			"border border-white/[0.1] dark:border-white/[0.08]",
+			"placeholder:text-white/40 text-white",
+			"focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20",
+			"disabled:cursor-not-allowed disabled:opacity-50",
 			className
 		)}
 		{type}
