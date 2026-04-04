@@ -158,9 +158,9 @@
     </Dialog.Header>
     {#if user}
       <div class="flex flex-col gap-4">
-        <div class="rounded-lg border border-white/10 bg-white/5 p-4">
+        <div class="rounded-lg border border-foreground/10 bg-foreground/5 p-4">
           <div class="flex items-start gap-3">
-            <div class="rounded-full bg-white/10 p-2">
+            <div class="rounded-full bg-foreground/10 p-2">
               <UserRound class="size-4" />
             </div>
             <div class="min-w-0">
@@ -175,7 +175,7 @@
             <p class="text-sm font-medium">Your passkeys</p>
             <div class="flex flex-col gap-1">
               {#each passkeys as passkey (passkey.id)}
-          <div class="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 p-3">
+          <div class="flex items-center gap-2 rounded-lg border border-foreground/10 bg-foreground/5 p-3">
             <Key class="size-4" />
             <div class="min-w-0 flex-1">
               <p>{passkey.name}</p>
@@ -220,7 +220,7 @@
         <Button variant="ghost" onclick={signOut}>Sign out</Button>
       </div>
     {:else}
-      <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-4 pt-4">
         <div class="flex w-full flex-col gap-1.5">
           <Label for="accountNumber">Account Number</Label>
           <div class="flex items-center gap-2">
@@ -235,9 +235,7 @@
             <Button
               type="button"
               size="icon"
-              aria-label="Sign in with account number"
-              onclick={signInWithAccountNumber}
-              disabled={busyAction === 'account-number'}
+              onclick={signInWithPasskey} disabled={busyAction === 'passkey-sign-in'}
             >
               <Key />
             </Button>
@@ -246,9 +244,13 @@
         <Button type="button" onclick={signInWithAccountNumber} disabled={busyAction === 'account-number'}>
           {busyAction === 'account-number' ? 'Signing in...' : 'Sign in with account number'}
         </Button>
-        <Button type="button" onclick={signInWithPasskey} disabled={busyAction === 'passkey-sign-in'} variant="ghost">
-          {busyAction === 'passkey-sign-in' ? 'Waiting for passkey...' : 'Sign in with passkey'}
-        </Button>
+
+        <div class="relative my-2 flex items-center gap-3">
+          <div class="h-px flex-1 bg-foreground/20"></div>
+          <span class="text-sm text-foreground/70">or</span>
+          <div class="h-px flex-1 bg-foreground/20"></div>
+        </div>
+
         <Button type="button" onclick={createAccount} disabled={busyAction === 'create-account'} variant="ghost">
           {busyAction === 'create-account' ? 'Creating account...' : 'Create account number'}
         </Button>
