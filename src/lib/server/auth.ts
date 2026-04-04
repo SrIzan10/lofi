@@ -21,6 +21,58 @@ const getAnonymousDisplayName = (name?: string | null) => {
   return trimmedName ? trimmedName : 'Chillhop listener';
 };
 
+type TurnstileVerifyResult = {
+  success: boolean;
+  hostname?: string;
+  ['error-codes']?: string[];
+};
+
+const getClientIpAddress = () => {
+  const headers = getRequestEvent().request.headers;
+  return headers.get('CF-Connecting-IP') ?? headers.get('X-Forwarded-For') ?? undefined;
+};
+
+const verifyTurnstileToken = async (token: string) => {
+  if (!env.TURNSTILE_SECRET_KEY) {
+    throw new APIError('INTERNAL_SERVER_ERROR', {
+      message: 'Turnstile secret key is not configured',
+    });
+  }
+
+  const verificationBody = new FormData();
+  verificationBody.set('secret', env.TURNSTILE_SECRET_KEY);
+  verificationBody.set('response', token);
+
+  const remoteIp = getClientIpAddress();
+  if (remoteIp) {
+    verificationBody.set('remoteip', remoteIp);
+  }
+
+  verificationBody.set('idempotency_key', crypto.randomUUID());
+
+  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    body: verificationBody,
+  });
+
+  if (!response.ok) {
+    throw new APIError('BAD_REQUEST', {
+      message: 'Turnstile verification failed. Please try again.',
+    });
+  }
+
+  const result = (await response.json()) as TurnstileVerifyResult;
+
+  if (!result.success) {
+    throw new APIError('BAD_REQUEST', {
+      message:
+        result['error-codes']?.includes('timeout-or-duplicate')
+          ? 'Turnstile check expired. Please try again.'
+          : 'Please complete the Turnstile check before creating an account.',
+    });
+  }
+};
+
 const createAnonymousSession = async (ctx: any, name?: string | null) => {
   const user = await ctx.context.internalAdapter.createUser({
     email: generateOpaqueIdentifier(),
@@ -65,9 +117,13 @@ const accountNumber = () =>
           method: 'POST',
           body: z.object({
             name: z.string().trim().max(100).optional(),
+            turnstileToken: z.string().min(1),
           }),
         },
-        async (ctx) => ctx.json(await createAnonymousSession(ctx, ctx.body.name)),
+        async (ctx) => {
+          await verifyTurnstileToken(ctx.body.turnstileToken);
+          return ctx.json(await createAnonymousSession(ctx, ctx.body.name));
+        },
       ),
       signInAccountNumber: createAuthEndpoint(
         '/sign-in/account-number',

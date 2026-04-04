@@ -7,7 +7,7 @@ export async function getChillhopStation(id: number): Promise<Song[]> {
   const finalData = data.map(song => ({
     artists: song.artists,
     title: song.title,
-    endpoint: `https://stream.chillhop.com/mp3/${song.fileId}`,
+    endpoint: `/api/chstream/${song.fileId}`,
     image: song.image,
     label: 'Chillhop Music',
     spotifyId: song.spotifyId,

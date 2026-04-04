@@ -13,6 +13,9 @@
   import Plus from '@lucide/svelte/icons/plus';
   import Loader2 from '@lucide/svelte/icons/loader-2';
   import type { Passkey } from '@better-auth/passkey';
+  import { Turnstile } from 'svelte-turnstile';
+  import { dev } from '$app/environment';
+  import { env as publicEnv } from '$env/dynamic/public';
 
   const session = authClient.useSession();
 
@@ -27,6 +30,11 @@
   let loadedPasskeysForUserId = $state<string | null>(null);
   let authScreen = $state<'login' | 'create'>('login');
   let passkeyName = $state('');
+  let turnstileToken = $state('');
+  let resetTurnstile = $state<(() => void) | undefined>();
+  const turnstileSiteKey = $derived(
+    dev ? '1x00000000000000000000AA' : (publicEnv.PUBLIC_TURNSTILE_SITE_KEY ?? '')
+  );
 
   const loadPasskeys = async () => {
     if (!user) {
@@ -84,17 +92,50 @@
       }
     );
 
-  const createAccount = () =>
-    runAuthAction(
+  const clearTurnstile = () => {
+    turnstileToken = '';
+    resetTurnstile?.();
+  };
+
+  const handleTurnstileCallback = (
+    event: CustomEvent<{ token: string; preClearanceObtained: boolean }>
+  ) => {
+    turnstileToken = event.detail.token;
+    authMessage = '';
+  };
+
+  const handleTurnstileError = () => {
+    clearTurnstile();
+    authMessage = 'Turnstile verification failed. Please try again.';
+  };
+
+  const handleTurnstileExpired = () => {
+    clearTurnstile();
+    authMessage = 'Turnstile check expired. Please try again.';
+  };
+
+  const createAccount = async () => {
+    if (!turnstileToken) {
+      authMessage = 'Please complete the Turnstile check before creating an account.';
+      return;
+    }
+
+    await runAuthAction(
       'create-account',
-      () => authClient.createAccount(name),
+      () => authClient.createAccount(name, turnstileToken),
       'Account creation failed',
       async () => {
         await session.get().refetch();
         name = '';
         authScreen = 'login';
+        clearTurnstile();
       }
     );
+
+    if (busyAction !== 'create-account') {
+      clearTurnstile();
+    }
+  };
 
   const signInWithPasskey = () =>
     runAuthAction(
@@ -382,10 +423,18 @@
             />
           </div>
 
+          <Turnstile
+            siteKey={turnstileSiteKey}
+            bind:reset={resetTurnstile}
+            on:callback={handleTurnstileCallback}
+            on:error={handleTurnstileError}
+            on:expired={handleTurnstileExpired}
+          />
+
           <Button
             type="button"
             onclick={createAccount}
-            disabled={busyAction === 'create-account' || !name}
+            disabled={busyAction === 'create-account' || !name || !turnstileToken}
             class="w-full disabled:opacity-50"
           >
             {#if busyAction === 'create-account'}
