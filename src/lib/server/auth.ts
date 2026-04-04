@@ -16,10 +16,59 @@ const generateAccountNumber = () =>
 
 const generateOpaqueIdentifier = () => `${crypto.randomUUID()}@internal.invalid`;
 
+const getAnonymousDisplayName = (name?: string | null) => {
+  const trimmedName = name?.trim();
+  return trimmedName ? trimmedName : 'Chillhop listener';
+};
+
+const createAnonymousSession = async (ctx: any, name?: string | null) => {
+  const user = await ctx.context.internalAdapter.createUser({
+    email: generateOpaqueIdentifier(),
+    emailVerified: false,
+    isAnonymous: true,
+    name: getAnonymousDisplayName(name),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+
+  if (!user) {
+    throw new APIError('INTERNAL_SERVER_ERROR', {
+      message: 'Failed to create user',
+    });
+  }
+
+  const session = await ctx.context.internalAdapter.createSession(user.id);
+  if (!session) {
+    throw new APIError('INTERNAL_SERVER_ERROR', {
+      message: 'Failed to create session',
+    });
+  }
+
+  await setSessionCookie(
+    ctx,
+    { session, user } as Parameters<typeof setSessionCookie>[1],
+  );
+
+  return {
+    token: session.token,
+    user,
+  };
+};
+
 const accountNumber = () =>
   ({
     id: 'account-number',
     endpoints: {
+      createAccount: createAuthEndpoint(
+        '/create-account',
+        {
+          method: 'POST',
+          body: z.object({
+            name: z.string().trim().max(100).optional(),
+          }),
+        },
+        async (ctx) => ctx.json(await createAnonymousSession(ctx, ctx.body.name)),
+      ),
       signInAccountNumber: createAuthEndpoint(
         '/sign-in/account-number',
         {
@@ -91,7 +140,7 @@ const authConfig = {
   },
   plugins: [
     anonymous({
-      generateName: () => 'Chillhop listener',
+      generateName: () => getAnonymousDisplayName(),
       generateRandomEmail: generateOpaqueIdentifier,
     }),
     accountNumber(),

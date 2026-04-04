@@ -9,18 +9,21 @@
   import Input from '../ui/input/input.svelte';
   import Key from '@lucide/svelte/icons/key';
   import Trash2 from '@lucide/svelte/icons/trash-2';
+  import ArrowLeft from '@lucide/svelte/icons/arrow-left';
   import type { Passkey } from '@better-auth/passkey';
- 
+
   const session = authClient.useSession();
 
   let open = $state(false);
   let accountNumber = $state('');
+  let name = $state('');
   let authMessage = $state('');
   let busyAction = $state<string | null>(null);
   let passkeyMessage = $state('');
   const user = $derived($session.data?.user);
   let passkeys = $state<Passkey[]>([]);
   let loadedPasskeysForUserId = $state<string | null>(null);
+  let authScreen = $state<'login' | 'create'>('login');
 
   let passkeyName = $state('');
 
@@ -48,12 +51,11 @@
     }
   });
 
-
   const runAuthAction = async (
     action: string,
     request: () => Promise<{ error?: { message?: string | null } | null }>,
     fallbackMessage: string,
-    onSuccess?: () => void,
+    onSuccess?: () => void | Promise<void>
   ) => {
     busyAction = action;
     authMessage = '';
@@ -67,7 +69,7 @@
       return;
     }
 
-    onSuccess?.();
+    await onSuccess?.();
     open = false;
   };
 
@@ -78,11 +80,20 @@
       'Account number sign-in failed',
       () => {
         accountNumber = '';
-      },
+      }
     );
 
   const createAccount = () =>
-    runAuthAction('create-account', () => authClient.signIn.anonymous(), 'Account creation failed');
+    runAuthAction(
+      'create-account',
+      () => authClient.createAccount(name),
+      'Account creation failed',
+      async () => {
+        await session.get().refetch();
+        name = '';
+        authScreen = 'login';
+      }
+    );
 
   const signInWithPasskey = () =>
     runAuthAction(
@@ -91,7 +102,7 @@
         authClient.signIn.passkey({
           autoFill: true,
         }),
-      'Passkey sign-in failed',
+      'Passkey sign-in failed'
     );
 
   const signOut = () => runAuthAction('sign-out', () => authClient.signOut(), 'Sign out failed');
@@ -143,7 +154,7 @@
     <Button class="flex items-center gap-2">
       {#if user}
         <Settings />
-        Settings
+        Account
       {:else}
         <LogIn />
         Sign in
@@ -165,7 +176,7 @@
             </div>
             <div class="min-w-0">
               <p class="font-medium">{user.name}</p>
-                <p class="text-sm opacity-70">Account #{user.accountNumber}</p>
+              <p class="text-sm opacity-70">Account #{user.accountNumber}</p>
             </div>
           </div>
         </div>
@@ -175,27 +186,31 @@
             <p class="text-sm font-medium">Your passkeys</p>
             <div class="flex flex-col gap-1">
               {#each passkeys as passkey (passkey.id)}
-          <div class="flex items-center gap-2 rounded-lg border border-foreground/10 bg-foreground/5 p-3">
-            <Key class="size-4" />
-            <div class="min-w-0 flex-1">
-              <p>{passkey.name}</p>
-              <p class="text-sm opacity-70">Added on {new Date(passkey.createdAt).toLocaleDateString()}</p>
-            </div>
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              aria-label={`Delete passkey ${passkey.name}`}
-              onclick={() => deletePasskey(passkey.id)}
-              disabled={busyAction === `delete-passkey-${passkey.id}`}
-            >
-              {#if busyAction === `delete-passkey-${passkey.id}`}
-                ...
-              {:else}
-                <Trash2 class="size-4" />
-              {/if}
-            </Button>
-          </div>
+                <div
+                  class="flex items-center gap-2 rounded-lg border border-foreground/10 bg-foreground/5 p-3"
+                >
+                  <Key class="size-4" />
+                  <div class="min-w-0 flex-1">
+                    <p>{passkey.name}</p>
+                    <p class="text-sm opacity-70">
+                      Added on {new Date(passkey.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    aria-label={`Delete passkey ${passkey.name}`}
+                    onclick={() => deletePasskey(passkey.id)}
+                    disabled={busyAction === `delete-passkey-${passkey.id}`}
+                  >
+                    {#if busyAction === `delete-passkey-${passkey.id}`}
+                      ...
+                    {:else}
+                      <Trash2 class="size-4" />
+                    {/if}
+                  </Button>
+                </div>
               {/each}
             </div>
           </div>
@@ -221,41 +236,81 @@
       </div>
     {:else}
       <div class="flex flex-col gap-4 pt-4">
-        <div class="flex w-full flex-col gap-1.5">
-          <Label for="accountNumber">Account Number</Label>
-          <div class="flex items-center gap-2">
-            <Input
-              type="text"
-              id="accountNumber"
-              bind:value={accountNumber}
-              placeholder="7276769420"
-              autocomplete="one-time-code webauthn"
-              class="flex-1"
-            />
+        {#if authScreen === 'login'}
+          <div class="flex w-full flex-col gap-1.5">
+            <Label for="accountNumber">Account Number</Label>
+            <div class="flex items-center gap-2">
+              <Input
+                type="text"
+                id="accountNumber"
+                bind:value={accountNumber}
+                placeholder="7276769420"
+                autocomplete="one-time-code webauthn"
+                class="flex-1"
+              />
+              <Button
+                type="button"
+                size="icon"
+                onclick={signInWithPasskey}
+                disabled={busyAction === 'passkey-sign-in'}
+              >
+                <Key />
+              </Button>
+            </div>
+          </div>
+          <Button
+            type="button"
+            onclick={signInWithAccountNumber}
+            disabled={busyAction === 'account-number'}
+          >
+            {busyAction === 'account-number' ? 'Signing in...' : 'Sign in with account number'}
+          </Button>
+
+          <div class="relative my-2 flex items-center gap-3">
+            <div class="h-px flex-1 bg-foreground/20"></div>
+            <span class="text-sm text-foreground/70">or</span>
+            <div class="h-px flex-1 bg-foreground/20"></div>
+          </div>
+
+          <Button
+            type="button"
+            onclick={() => (authScreen = 'create')}
+            disabled={busyAction === 'create-account'}
+            variant="ghost"
+          >
+            {busyAction === 'create-account' ? 'Creating account...' : 'Create account number'}
+          </Button>
+          {#if authMessage}
+            <p class="text-sm text-red-400">{authMessage}</p>
+          {/if}
+        {:else if authScreen === 'create'}
+          <Label for="name">Your name</Label>
+          <Input
+            type="text"
+            id="name"
+            bind:value={name}
+            placeholder="Steve Jobs"
+            autocomplete="name webauthn"
+          />
+
+          <div class="flex w-full items-center gap-2">
             <Button
               type="button"
-              size="icon"
-              onclick={signInWithPasskey} disabled={busyAction === 'passkey-sign-in'}
+              onclick={createAccount}
+              disabled={busyAction === 'create-account'}
+              class="flex-1"
             >
-              <Key />
+              {busyAction === 'create-account' ? 'Creating account...' : 'Create account number'}
+            </Button>
+            <Button
+              variant="ghost"
+              onclick={() => (authScreen = 'login')}
+              disabled={busyAction === 'passkey-sign-in'}
+              aria-label="Go back"
+            >
+              <ArrowLeft />
             </Button>
           </div>
-        </div>
-        <Button type="button" onclick={signInWithAccountNumber} disabled={busyAction === 'account-number'}>
-          {busyAction === 'account-number' ? 'Signing in...' : 'Sign in with account number'}
-        </Button>
-
-        <div class="relative my-2 flex items-center gap-3">
-          <div class="h-px flex-1 bg-foreground/20"></div>
-          <span class="text-sm text-foreground/70">or</span>
-          <div class="h-px flex-1 bg-foreground/20"></div>
-        </div>
-
-        <Button type="button" onclick={createAccount} disabled={busyAction === 'create-account'} variant="ghost">
-          {busyAction === 'create-account' ? 'Creating account...' : 'Create account number'}
-        </Button>
-        {#if authMessage}
-          <p class="text-sm text-red-400">{authMessage}</p>
         {/if}
       </div>
     {/if}

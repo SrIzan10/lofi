@@ -7,6 +7,13 @@ import type { auth } from '$lib/server/auth';
 const accountNumberClient = {
   id: 'account-number',
   getActions: ($fetch) => ({
+    createAccount: async (name?: string) =>
+      $fetch('/create-account', {
+        method: 'POST',
+        body: {
+          name,
+        },
+      }),
     signInAccountNumber: async (accountNumber: string) =>
       $fetch('/sign-in/account-number', {
         method: 'POST',
