@@ -1,5 +1,4 @@
 // overengineered proxy brought to you by codex.
-
 import type { RequestHandler } from '@sveltejs/kit';
 
 const FILE_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
