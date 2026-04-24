@@ -32,6 +32,10 @@ export const POST: RequestHandler = async (event) => {
     return json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  if (user.statisticsOptOut) {
+    return json({ ok: true, skipped: true });
+  }
+
   const body = (await event.request.json().catch(() => ({}))) as ListenBody;
   const fileId = typeof body.fileId === 'string' ? body.fileId.trim() : '';
   const stationId = typeof body.stationId === 'number' ? body.stationId : Number(body.stationId);

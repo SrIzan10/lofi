@@ -37,6 +37,8 @@ export const state = $state({
   isPomodoroActive: false,
   pomodoroWorkPhase: true,
 
+  showStats: false,
+
   // in daemon.svelte
   togglePlay: (() => {}) as () => void,
 });

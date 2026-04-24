@@ -1,0 +1,1 @@
+ALTER TABLE `user` ADD `statistics_opt_out` integer DEFAULT false NOT NULL;

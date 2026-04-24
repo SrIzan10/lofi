@@ -43,6 +43,13 @@
       "when": 1777011840981,
       "tag": "0005_chubby_master_mold",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1777041984571,
+      "tag": "0006_known_avengers",
+      "breakpoints": true
     }
   ]
 }

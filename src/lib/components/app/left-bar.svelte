@@ -4,6 +4,7 @@
   import Button from '../ui/button/button.svelte';
   import Binoculars from '@lucide/svelte/icons/binoculars';
   import Clock from '@lucide/svelte/icons/clock';
+  import ChartNoAxesColumn from '@lucide/svelte/icons/chart-no-axes-column';
 </script>
 
 <div
@@ -23,5 +24,11 @@
     onclick={() => (appState.showPomodoro = !appState.showPomodoro)}
   >
     <Clock class="size-4" />
+  </Button>
+  <Button
+    size="icon"
+    onclick={() => (appState.showStats = !appState.showStats)}
+  >
+    <ChartNoAxesColumn class="size-4" />
   </Button>
 </div>

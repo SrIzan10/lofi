@@ -7,6 +7,11 @@
   import TodoList from './todo-list.svelte';
   import Twentytwentytwenty from './twentytwentytwenty.svelte';
   import Pomodoro from './pomodoro.svelte';
+  import Stats from './stats.svelte';
+  import { authClient } from '$lib';
+
+  const session = authClient.useSession();
+  const user = $derived($session.data?.user);
 
   // svelte-ignore non_reactive_update
   let audioElement: HTMLAudioElement;
@@ -167,6 +172,7 @@
         !appState.isPlaying ||
         !appState.currentSong ||
         !appState.currentStation ||
+        user?.statisticsOptOut ||
         !audioElement ||
         audioElement.paused
       ) {
@@ -299,4 +305,16 @@
   show={appState.showPomodoro}
 >
   <Pomodoro></Pomodoro>
+</Window>
+
+<Window
+  title="Stats"
+  showTitleBar={true}
+  showCloseButton={true}
+  width={500}
+  height={400}
+  onClose={() => appState.showStats = false}
+  show={appState.showStats}
+>
+  <Stats></Stats>
 </Window>

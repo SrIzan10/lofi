@@ -16,6 +16,7 @@
   import { Turnstile } from 'svelte-turnstile';
   import { dev } from '$app/environment';
   import { env as publicEnv } from '$env/dynamic/public';
+  import Switch from '../ui/switch/switch.svelte';
 
   const session = authClient.useSession();
 
@@ -30,6 +31,7 @@
   let loadedPasskeysForUserId = $state<string | null>(null);
   let authScreen = $state<'login' | 'create'>('login');
   let passkeyName = $state('');
+  let statisticsMessage = $state('');
   let turnstileToken = $state('');
   let resetTurnstile = $state<(() => void) | undefined>();
   let createFormElement = $state<HTMLDivElement>();
@@ -161,6 +163,28 @@
 
   const signOut = () => runAuthAction('sign-out', () => authClient.signOut(), 'Sign out failed');
 
+  const updateStatisticsOptOut = async (statisticsOptOut: boolean) => {
+    busyAction = 'statistics-opt-out';
+    statisticsMessage = '';
+
+    const response = await fetch('/api/account/statistics-opt-out', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ statisticsOptOut }),
+    });
+
+    busyAction = null;
+    if (!response.ok) {
+      statisticsMessage = 'Failed to update statistics preference';
+      return;
+    }
+
+    await session.get().refetch();
+    statisticsMessage = statisticsOptOut
+      ? 'Statistics collection is turned off.'
+      : 'Statistics collection is turned on.';
+  };
+
   const addPasskey = async () => {
     if (!passkeyName) {
       passkeyMessage = 'Please enter a name for your passkey';
@@ -241,6 +265,28 @@
             <p class="font-semibold text-white truncate">{user.name}</p>
             <p class="text-sm text-white/50 font-mono tracking-tight">#{user.accountNumber}</p>
           </div>
+        </div>
+
+        <div class="space-y-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+          <div class="flex items-center justify-between gap-4">
+            <div class="min-w-0 space-y-1">
+              <h3 class="text-sm font-medium text-white/80">Listening statistics</h3>
+              <p class="text-xs leading-relaxed text-white/45">
+                {user.statisticsOptOut
+                  ? 'New listening activity is not being collected for your account.'
+                  : 'Collect listening activity to power your account statistics.'}
+              </p>
+            </div>
+            <Switch
+              id="statisticsCollection"
+              checked={!user.statisticsOptOut}
+              onCheckedChange={(checked) => updateStatisticsOptOut(!checked)}
+              disabled={busyAction === 'statistics-opt-out'}
+            />
+          </div>
+          {#if statisticsMessage}
+            <p class="text-xs text-white/60">{statisticsMessage}</p>
+          {/if}
         </div>
 
         <div class="space-y-3">

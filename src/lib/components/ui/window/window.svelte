@@ -112,7 +112,7 @@
 {#if show}
   <div
     bind:this={windowRef}
-    class="fixed flex flex-col bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-lg overflow-hidden"
+    class="fixed flex flex-col bg-foreground/20 backdrop-blur-md border border-foreground/20 shadow-lg rounded-lg overflow-hidden"
     style="width: {width}px; height: {height}px; left: {x}px; top: {y}px; z-index: {zIndex};"
     onmousedown={handleMouseDown}
     role="dialog"

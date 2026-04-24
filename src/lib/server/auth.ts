@@ -187,6 +187,13 @@ const authConfig = {
         fieldName: 'account_number',
         defaultValue: generateAccountNumber,
       },
+      statisticsOptOut: {
+        type: 'boolean',
+        required: true,
+        input: false,
+        fieldName: 'statistics_opt_out',
+        defaultValue: false,
+      },
     },
   },
   logger: {
