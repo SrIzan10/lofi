@@ -231,4 +231,4 @@ export const createAuth = (d1: D1Database, baseURL = env.ORIGIN) =>
  * This instance is used by the `better-auth` CLI for schema generation ONLY.
  * To access `auth` at runtime, use `event.locals.auth`.
  */
-export const auth = createAuth(null!);
+export const auth = createAuth(null!, 'http://localhost');
