@@ -39,7 +39,7 @@ get along, so we shut typescript up by casting `value` to `never`.
         index={thumb}
         class={cn(
           "border-primary/50 bg-background focus-visible:ring-ring block size-4 rounded-full border shadow transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50",
-          "bg-white/10 backdrop-blur-md hover:bg-white/15 text-foreground border border-white/20 shadow-lg translate-z-0 relative z-20",
+          "bg-foreground backdrop-blur-md hover:bg-foreground/85 text-foreground border border-foreground/20 shadow-lg translate-z-0 relative z-20",
         )}
       />
     {/each}

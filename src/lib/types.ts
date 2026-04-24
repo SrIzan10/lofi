@@ -1,4 +1,5 @@
 export interface Song {
+  fileId: string;
   artists: string;
   title: string;
   endpoint: string;

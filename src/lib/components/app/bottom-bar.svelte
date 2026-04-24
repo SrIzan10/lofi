@@ -4,11 +4,10 @@
   import MusicPlayer from '@/components/app/now-playing.svelte';
   import Sounds from '@/components/app/atmospheres.svelte';
   import StationDropdown from '@/components/app/station-dropdown.svelte';
-  import Feedback from '@/components/app/feedback.svelte';
 </script>
 
 <div
-  class="fixed bottom-5 left-2 right-2 z-50 flex flex-col sm:flex-row items-center p-4 bg-white/10 backdrop-blur-lg rounded-xl shadow-lg"
+  class="fixed bottom-5 left-2 right-2 z-50 flex flex-col sm:flex-row items-center p-4 bg-foreground/10 backdrop-blur-lg rounded-xl shadow-lg"
 >
   <MusicPlayer />
   
@@ -17,7 +16,6 @@
     <StationDropdown />
     <BgDropdown />
     <Sounds />
-    <Feedback />
     <Disclaimer />
   </div>
 </div>

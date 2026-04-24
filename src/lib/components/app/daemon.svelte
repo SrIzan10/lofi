@@ -6,6 +6,12 @@
   import Window from '../ui/window/window.svelte';
   import TodoList from './todo-list.svelte';
   import Twentytwentytwenty from './twentytwentytwenty.svelte';
+  import Pomodoro from './pomodoro.svelte';
+  import Stats from './stats.svelte';
+  import { authClient } from '$lib';
+
+  const session = authClient.useSession();
+  const user = $derived($session.data?.user);
 
   // svelte-ignore non_reactive_update
   let audioElement: HTMLAudioElement;
@@ -160,6 +166,34 @@
     }
   });
 
+  onMount(() => {
+    const listenInterval = setInterval(async () => {
+      if (
+        !appState.isPlaying ||
+        !appState.currentSong ||
+        !appState.currentStation ||
+        !user ||
+        user?.statisticsOptOut ||
+        !audioElement ||
+        audioElement.paused
+      ) {
+        return;
+      }
+
+      await fetch('/api/listen', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          fileId: appState.currentSong.fileId,
+          stationId: appState.currentStation,
+          seconds: 30,
+        }),
+      });
+    }, 30_000);
+
+    return () => clearInterval(listenInterval);
+  })
+
   $effect(() => {
     if (!audioElement) return;
     togglePlayback(appState.isPlaying);
@@ -260,4 +294,28 @@
   show={appState.show202020}
 >
   <Twentytwentytwenty></Twentytwentytwenty>
+</Window>
+
+<Window
+  title="Pomodoro Timer"
+  showTitleBar={true}
+  showCloseButton={true}
+  width={320}
+  height={250}
+  onClose={() => appState.showPomodoro = false}
+  show={appState.showPomodoro}
+>
+  <Pomodoro></Pomodoro>
+</Window>
+
+<Window
+  title="Stats"
+  showTitleBar={true}
+  showCloseButton={true}
+  width={500}
+  height={400}
+  onClose={() => appState.showStats = false}
+  show={appState.showStats}
+>
+  <Stats></Stats>
 </Window>

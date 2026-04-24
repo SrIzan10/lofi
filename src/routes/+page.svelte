@@ -7,6 +7,7 @@
   import BackgroundAnalyzer from '@/components/app/bg-analyzer.svelte';
   import Title from '@/components/app/title.svelte';
   import LeftBar from '@/components/app/left-bar.svelte';
+  import AuthBar from '@/components/app/auth-bar.svelte';
 </script>
 
 <BgImage />
@@ -20,7 +21,7 @@
   </div>
 {:else if state.isLoading && state.hasInteracted}
   <div class="flex flex-col h-screen w-full items-center justify-center space-y-2">
-    <Spinner class="size-10" />
+    <Spinner class="size-10 animate-spin" />
     <p>Loading...</p>
   </div>
 {:else if state.error}
@@ -29,6 +30,7 @@
   </div>
 {:else if state.hasInteracted}
   <Title />
+  <AuthBar />
   <LeftBar />
   <BottomBar />
 {/if}

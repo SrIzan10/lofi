@@ -11,6 +11,6 @@
 
 <DialogPrimitive.Description
 	bind:ref
-	class={cn("text-black/80 text-sm", className)}
+	class={cn("text-white/70 text-sm leading-relaxed", className)}
 	{...restProps}
 />

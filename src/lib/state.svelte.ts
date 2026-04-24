@@ -31,6 +31,14 @@ export const state = $state({
   workRuleTimer: 20 * 60,
   restRuleTimer: 20,
 
+  showPomodoro: false,
+  pomodoroTimer: 20 * 60,
+  pomodoroBreakTimer: 5 * 60,
+  isPomodoroActive: false,
+  pomodoroWorkPhase: true,
+
+  showStats: false,
+
   // in daemon.svelte
   togglePlay: (() => {}) as () => void,
 });
