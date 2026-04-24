@@ -28,7 +28,7 @@ export const stations: Record<number, () => Promise<Song[]>> = new Proxy(customS
   },
 });
 
-export const stationMetadata = Promise.resolve([
+export const getStationMetadata = async (): Promise<Station[]> => [
   ...(await getChillhopData()).stations,
   { id: 50000, name: 'Lofi Sleep' },
-]) as Promise<Station[]>;
+];

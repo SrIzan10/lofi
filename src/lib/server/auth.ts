@@ -192,7 +192,6 @@ const createAuthConfig = (baseURL = env.ORIGIN) =>
           type: 'boolean',
           required: true,
           input: false,
-          fieldName: 'statistics_opt_out',
           defaultValue: false,
         },
       },

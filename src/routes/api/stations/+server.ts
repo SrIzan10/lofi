@@ -1,10 +1,10 @@
-import { stationMetadata } from '@/stations';
+import { getStationMetadata } from '@/stations';
 import { getChillhopData } from '@/utils';
 import type { RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async () => {
   const responses = await Promise.all([
-    stationMetadata,
+    getStationMetadata(),
     getChillhopData(),
   ]);
 
