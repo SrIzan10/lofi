@@ -174,7 +174,13 @@ const accountNumber = () =>
     },
   }) satisfies BetterAuthPlugin;
 
-const createAuthConfig = (baseURL = env.ORIGIN) =>
+const getAuthBaseURL = (requestOrigin?: string) => {
+  if (dev) return requestOrigin ?? env.ORIGIN ?? 'http://localhost:5173';
+
+  return env.ORIGIN || requestOrigin || 'http://localhost';
+};
+
+const createAuthConfig = (baseURL: string) =>
   ({
     baseURL,
     secret: env.BETTER_AUTH_SECRET,
@@ -218,9 +224,9 @@ const createAuthConfig = (baseURL = env.ORIGIN) =>
     ],
   }) satisfies Omit<Parameters<typeof betterAuth>[0], 'database'>;
 
-export const createAuth = (d1: D1Database, baseURL = env.ORIGIN) =>
+export const createAuth = (d1: D1Database, requestOrigin?: string) =>
   betterAuth({
-    ...createAuthConfig(baseURL),
+    ...createAuthConfig(getAuthBaseURL(requestOrigin)),
     database: drizzleAdapter(getDb(d1), { provider: 'sqlite' }),
   });
 

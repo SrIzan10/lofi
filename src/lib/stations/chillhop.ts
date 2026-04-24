@@ -8,6 +8,7 @@ import { and, eq } from 'drizzle-orm';
 export async function getChillhopStation(id: number): Promise<Song[]> {
   const res = await fetch(`https://stream.chillhop.com/live/${id}`);
   const data = (await res.json()) as CHSong[];
+  const event = getRequestEvent();
   
   const finalData = data.map((song) => ({
     fileId: String(song.fileId),
@@ -20,19 +21,26 @@ export async function getChillhopStation(id: number): Promise<Song[]> {
     duration: song.duration ?? 0,
   })) as Song[];
 
-  // should not await because it doesn't need to be done before returning the data
-  for (const song of finalData) {
-    analyticsData(song).catch((err) => {
-      console.error('Failed to store analytics data for song:', song.title, err);
-    });
-  }
+  const db = getRequestDb();
+  const analyticsPromise = Promise.all(
+    finalData.map((song) =>
+      analyticsData(db, song).catch((err) => {
+        console.error('Failed to store analytics data for song:', song.title, err);
+      }),
+    ),
+  ).then(() => undefined);
+
+  event.platform?.ctx.waitUntil(analyticsPromise);
   
   return finalData;
 }
 
-async function analyticsData(song: Song) {
-  const db = getRequestDb();
-  const existingSong = await db.select().from(songIds).where(and(eq(songIds.title, song.title), eq(songIds.artists, song.artists))).get();
+async function analyticsData(db: ReturnType<typeof getRequestDb>, song: Song) {
+  const existingSong = await db
+    .select()
+    .from(songIds)
+    .where(and(eq(songIds.title, song.title), eq(songIds.artists, song.artists)))
+    .get();
   
   if (existingSong) return;
 

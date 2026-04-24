@@ -13,6 +13,9 @@
   "observability": {
     "enabled": true,
   },
+  "vars": {
+    "ORIGIN": "https://lofi.srizan.dev",
+  },
   "routes": [
     {
       "pattern": "lofi.srizan.dev",

@@ -156,7 +156,7 @@
       'passkey-sign-in',
       () =>
         authClient.signIn.passkey({
-          autoFill: true,
+          autoFill: false,
         }),
       'Passkey sign-in failed'
     );
