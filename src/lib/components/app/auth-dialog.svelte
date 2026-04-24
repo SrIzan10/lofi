@@ -241,7 +241,10 @@
       </span>
     </Button>
   </Dialog.Trigger>
-  <Dialog.Content class="!p-0 !gap-0 overflow-hidden max-w-md w-[95vw]">
+  <Dialog.Content
+    class="!p-0 !gap-0 overflow-hidden max-w-md w-[95vw]"
+    style="--text-color: rgba(255, 255, 255, 0.92); --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); --foreground: 0 0% 98%; --muted-foreground: 0 0% 72%;"
+  >
     <Dialog.Header class="p-5 border-b border-white/[0.06]">
       <Dialog.Title class="!text-lg !font-semibold tracking-tight">
         {user ? 'Account Settings' : 'Welcome Back'}
@@ -332,8 +335,8 @@
               <div
                 class="flex items-center gap-3 p-4 rounded-lg bg-white/[0.02] border border-dashed border-white/[0.1] text-white/40"
               >
-                <Fingerprint class="size-5 opacity-50" />
-                <p class="text-sm">No passkeys added yet</p>
+                <Fingerprint class="size-5 !text-white/40" />
+                <p class="text-sm !text-white/40">No passkeys added yet</p>
               </div>
             {/each}
           </div>
@@ -350,7 +353,11 @@
                 class="!h-10"
               />
             </div>
-            <Button onclick={addPasskey} disabled={busyAction === 'add-passkey'} class="!h-10 px-4">
+            <Button
+              onclick={addPasskey}
+              disabled={busyAction === 'add-passkey'}
+              class="!h-10 px-4 !text-white/80 hover:!text-white"
+            >
               {#if busyAction === 'add-passkey'}
                 <Loader2 class="size-4 animate-spin" />
               {:else}
@@ -376,7 +383,7 @@
             variant="ghost"
             onclick={signOut}
             disabled={busyAction === 'sign-out'}
-            class="w-full justify-center gap-2 text-white/60 hover:text-white hover:bg-white/[0.06]"
+            class="w-full justify-center gap-2 !text-white/60 hover:!text-white hover:bg-white/[0.06]"
           >
             {#if busyAction === 'sign-out'}
               <Loader2 class="size-4 animate-spin" />

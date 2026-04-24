@@ -112,8 +112,8 @@
 {#if show}
   <div
     bind:this={windowRef}
-    class="fixed flex flex-col bg-foreground/20 backdrop-blur-md border border-foreground/20 shadow-lg rounded-lg overflow-hidden"
-    style="width: {width}px; height: {height}px; left: {x}px; top: {y}px; z-index: {zIndex};"
+    class="fixed flex flex-col overflow-hidden rounded-2xl border border-white/[0.1] bg-black/[0.48] text-white shadow-[0_8px_32px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-2xl before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/[0.08] before:to-transparent"
+    style="width: {width}px; height: {height}px; left: {x}px; top: {y}px; z-index: {zIndex}; --foreground: 0 0% 98%; --muted-foreground: 0 0% 72%; --text-color: rgba(255, 255, 255, 0.92); --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);"
     onmousedown={handleMouseDown}
     role="dialog"
     tabindex="0"
@@ -121,14 +121,14 @@
     {#if showTitleBar}
       <div
         bind:this={headerRef}
-        class="h-8 px-3 flex items-center justify-between bg-black/10 border-b border-white/10 select-none"
+        class="relative z-10 flex h-8 items-center justify-between border-b border-white/[0.08] bg-black/10 px-3 select-none"
         style="cursor: {isDragging ? 'grabbing' : 'grab'};"
       >
-        <span class="text-sm font-medium text-foreground/90">{title}</span>
+        <span class="text-sm font-medium text-white/90">{title}</span>
         {#if showCloseButton}
           <button
             onclick={onClose}
-            class="w-5 h-5 flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-red-500/50 rounded-sm transition-colors"
+            class="flex h-5 w-5 items-center justify-center rounded-sm text-white/70 transition-colors hover:bg-red-500/45 hover:text-white"
             aria-label="Close window"
           >
             <X class="size-4" />
@@ -137,7 +137,7 @@
       </div>
     {/if}
 
-    <div class="flex-1 p-1 overflow-auto bg-transparent" role="dialog" tabindex="0">
+    <div class="relative z-10 flex-1 overflow-auto bg-transparent p-1" role="dialog" tabindex="0">
       {@render children?.()}
     </div>
   </div>

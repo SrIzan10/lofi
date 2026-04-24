@@ -1,8 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { state as appState } from '@/state.svelte';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-  import { buttonVariants } from '$lib/components/ui/button/index.js';
+  import Radio from '@lucide/svelte/icons/radio';
   import ListMusic from '@lucide/svelte/icons/list-music';
 
   type TopSong = {
@@ -28,6 +27,7 @@
   let stats = $state<StatsResponse | null>(null);
   let isLoading = $state(true);
   let error = $state<string | null>(null);
+  let activeTab = $state<'stations' | 'songs'>('stations');
 
   const formatDuration = (seconds: number) => {
     const totalMinutes = Math.floor(seconds / 60);
@@ -42,9 +42,18 @@
 
   const stationName = (stationId: number | null) => {
     const station = appState.stations.find((item) => item.id === stationId);
-
     return station?.name ?? 'Unknown station';
   };
+
+  const maxStationSeconds = $derived.by(() => {
+    if (!stats) return 1;
+    return Math.max(...stats.topStations.map((s) => s.seconds), 1);
+  });
+
+  const maxSongSeconds = $derived.by(() => {
+    if (!stats) return 1;
+    return Math.max(...stats.topSongs.map((s) => s.seconds), 1);
+  });
 
   onMount(async () => {
     try {
@@ -66,92 +75,112 @@
   });
 </script>
 
-<div class="flex h-full min-h-0 flex-col gap-4 overflow-hidden p-4 text-foreground">
-  <div>
-    <p class="text-xs uppercase tracking-[0.2em] text-foreground/50">Statistics</p>
-    <h2 class="text-2xl font-semibold leading-tight">Listening overview</h2>
-  </div>
-
+<div class="flex h-full min-h-0 flex-col p-5 text-foreground">
   {#if isLoading}
-    <div class="rounded-lg border border-white/10 bg-white/10 p-4 text-sm text-foreground/70">
-      Loading stats...
+    <div class="flex flex-1 flex-col items-center justify-center gap-3 text-foreground/40">
+      <div class="h-4 w-4 animate-spin rounded-full border-2 border-foreground/15 border-t-foreground/60"></div>
+      <span class="text-xs tracking-wide">Loading stats</span>
     </div>
   {:else if error}
-    <div class="rounded-lg border border-white/10 bg-white/10 p-4 text-sm text-foreground/70">
-      {error}
+    <div class="flex flex-1 flex-col items-center justify-center text-center">
+      <p class="text-sm text-foreground/50">{error}</p>
     </div>
   {:else if stats}
-    <div class="grid grid-cols-2 gap-3">
-      <div class="rounded-lg border border-white/10 bg-white/10 p-3">
-        <p class="text-xs uppercase tracking-[0.16em] text-foreground/50">Today</p>
-        <p class="mt-1 text-2xl font-semibold">{formatDuration(stats.todaySeconds)}</p>
-      </div>
-      <div class="rounded-lg border border-white/10 bg-white/10 p-3">
-        <p class="text-xs uppercase tracking-[0.16em] text-foreground/50">All time</p>
-        <p class="mt-1 text-2xl font-semibold">{formatDuration(stats.totalSeconds)}</p>
+    <div class="mb-5 shrink-0">
+      <p class="mb-2 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground/40">
+        Listening Stats
+      </p>
+      <div class="flex items-baseline gap-5">
+        <div>
+          <span class="text-3xl">{formatDuration(stats.todaySeconds)}</span>
+          <span class="ml-1.5 text-[10px] font-medium uppercase tracking-wider text-foreground/40">Today</span>
+        </div>
+        <div class="h-3 w-px bg-white/10"></div>
+        <div>
+          <span class="text-3xl">{formatDuration(stats.totalSeconds)}</span>
+          <span class="ml-1.5 text-[10px] font-medium uppercase tracking-wider text-foreground/40">All time</span>
+        </div>
       </div>
     </div>
 
-    <section class="flex min-h-0 flex-1 flex-col">
-      <div class="mb-2 flex items-center justify-between gap-3">
-        <h3 class="text-sm font-medium text-foreground/80">Top stations</h3>
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger
-            class={buttonVariants({
-              variant: 'default',
-              size: 'sm',
-              class: 'h-7 px-2 text-xs'
-            })}
-            aria-label="Show top songs"
-          >
-            <ListMusic class="size-3.5" />
-            Songs
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content class="w-72 max-h-72 overflow-y-auto" align="end">
-            <DropdownMenu.Label>Top songs</DropdownMenu.Label>
-            <DropdownMenu.Separator />
-            <DropdownMenu.Group>
-              {#each stats.topSongs as song}
-                <DropdownMenu.Item class="gap-3 p-2">
-                  {#if song.image}
-                    <img src={song.image} alt="" class="size-9 shrink-0 rounded-md object-cover" />
-                  {:else}
-                    <div class="size-9 shrink-0 rounded-md bg-white/10"></div>
-                  {/if}
-                  <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-medium">{song.title ?? song.fileId}</p>
-                    <p class="truncate text-xs text-foreground/55">
-                      {song.artists ?? 'Unknown artist'}
-                    </p>
-                  </div>
-                  <span class="shrink-0 text-xs text-foreground/60">
-                    {formatDuration(song.seconds)}
-                  </span>
-                </DropdownMenu.Item>
-              {:else}
-                <DropdownMenu.Item disabled class="text-foreground/60">
-                  No top songs yet
-                </DropdownMenu.Item>
-              {/each}
-            </DropdownMenu.Group>
-          </DropdownMenu.Content>
-        </DropdownMenu.Root>
+    <div class="mb-3 flex shrink-0 items-center justify-between">
+      <div class="flex rounded-lg border border-white/[0.06] bg-white/[0.03] p-0.5">
+        <button
+          class="flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-medium transition-all duration-200 {activeTab === 'stations' ? 'bg-white/10 text-foreground shadow-sm' : 'text-foreground/40 hover:text-foreground/70'}"
+          onclick={() => (activeTab = 'stations')}
+        >
+          <Radio class="size-3" />
+          Stations
+        </button>
+        <button
+          class="flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-medium transition-all duration-200 {activeTab === 'songs' ? 'bg-white/10 text-foreground shadow-sm' : 'text-foreground/40 hover:text-foreground/70'}"
+          onclick={() => (activeTab = 'songs')}
+        >
+          <ListMusic class="size-3" />
+          Songs
+        </button>
       </div>
+    </div>
 
-      <div class="min-h-0 space-y-2 overflow-y-auto pr-1">
-        {#each stats.topStations as station}
-          <div
-            class="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/10 px-3 py-2 text-sm"
-          >
-            <span class="min-w-0 truncate">{stationName(station.stationId)}</span>
-            <span class="shrink-0 text-foreground/60">{formatDuration(station.seconds)}</span>
+    <div class="min-h-0 flex-1 overflow-y-auto custom-scrollbar">
+      {#if activeTab === 'stations'}
+        {#each stats.topStations as station, i}
+          <div class="flex items-center gap-3 border-b border-white/[0.04] py-2.5 last:border-0">
+            <span class="w-4 text-right text-[10px] font-mono text-foreground/25">{i + 1}</span>
+            <div class="min-w-0 flex-1">
+              <div class="mb-1 flex items-center justify-between gap-3">
+                <span class="truncate text-sm text-foreground/90">
+                  {stationName(station.stationId)}
+                </span>
+                <span class="shrink-0 text-xs font-mono text-foreground/40">
+                  {formatDuration(station.seconds)}
+                </span>
+              </div>
+              <div class="h-[2px] overflow-hidden rounded-full bg-white/[0.06]">
+                <div
+                  class="h-full rounded-full bg-white/20 transition-all duration-700 ease-out"
+                  style="width: {(station.seconds / maxStationSeconds) * 100}%"
+                ></div>
+              </div>
+            </div>
           </div>
         {:else}
-          <p class="rounded-lg border border-white/10 bg-white/10 p-3 text-sm text-foreground/60">
-            Station stats will appear after you listen for a bit.
-          </p>
+          <div class="flex h-32 items-center justify-center">
+            <p class="text-xs text-foreground/30">Station stats will appear after you listen for a bit.</p>
+          </div>
         {/each}
-      </div>
-    </section>
+      {:else}
+        {#each stats.topSongs as song, i}
+          <div class="flex items-center gap-3 border-b border-white/[0.04] py-2.5 last:border-0">
+            <span class="w-4 text-right text-[10px] font-mono text-foreground/25">{i + 1}</span>
+            {#if song.image}
+              <img src={song.image} alt="" class="size-7 shrink-0 rounded-sm object-cover opacity-80" />
+            {:else}
+              <div class="size-7 shrink-0 rounded-sm bg-white/[0.06]"></div>
+            {/if}
+            <div class="min-w-0 flex-1">
+              <div class="mb-1 flex items-center justify-between gap-3">
+                <span class="truncate text-sm text-foreground/90">
+                  {song.title ?? song.fileId}
+                </span>
+                <span class="shrink-0 text-xs font-mono text-foreground/40">
+                  {formatDuration(song.seconds)}
+                </span>
+              </div>
+              <div class="h-[2px] overflow-hidden rounded-full bg-white/[0.06]">
+                <div
+                  class="h-full rounded-full bg-white/20 transition-all duration-700 ease-out"
+                  style="width: {(song.seconds / maxSongSeconds) * 100}%"
+                ></div>
+              </div>
+            </div>
+          </div>
+        {:else}
+          <div class="flex h-32 items-center justify-center">
+            <p class="text-xs text-foreground/30">No top songs yet.</p>
+          </div>
+        {/each}
+      {/if}
+    </div>
   {/if}
 </div>
