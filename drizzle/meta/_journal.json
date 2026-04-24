@@ -22,6 +22,27 @@
       "when": 1775246437951,
       "tag": "0002_account_number_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1775423880350,
+      "tag": "0003_stiff_captain_universe",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1775425092281,
+      "tag": "0004_abandoned_captain_stacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1777011840981,
+      "tag": "0005_chubby_master_mold",
+      "breakpoints": true
     }
   ]
 }

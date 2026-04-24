@@ -6,6 +6,7 @@ import { anonymous } from 'better-auth/plugins';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
 import type { D1Database } from '@cloudflare/workers-types';
 import { env } from '$env/dynamic/private';
+import { dev } from '$app/environment';
 import { getRequestEvent } from '$app/server';
 import { getDb } from '$lib/server/db';
 import { passkey } from '@better-auth/passkey';
@@ -33,14 +34,16 @@ const getClientIpAddress = () => {
 };
 
 const verifyTurnstileToken = async (token: string) => {
-  if (!env.TURNSTILE_SECRET_KEY) {
+  const secretKey = dev ? '1x0000000000000000000000000000000AA' : env.TURNSTILE_SECRET_KEY;
+
+  if (!secretKey) {
     throw new APIError('INTERNAL_SERVER_ERROR', {
       message: 'Turnstile secret key is not configured',
     });
   }
 
   const verificationBody = new FormData();
-  verificationBody.set('secret', env.TURNSTILE_SECRET_KEY);
+  verificationBody.set('secret', secretKey);
   verificationBody.set('response', token);
 
   const remoteIp = getClientIpAddress();
@@ -68,7 +71,7 @@ const verifyTurnstileToken = async (token: string) => {
       message:
         result['error-codes']?.includes('timeout-or-duplicate')
           ? 'Turnstile check expired. Please try again.'
-          : 'Please complete the Turnstile check before creating an account.',
+          : 'Turnstile verification failed. Please try again.',
     });
   }
 };

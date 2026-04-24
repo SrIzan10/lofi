@@ -161,6 +161,32 @@
     }
   });
 
+  onMount(() => {
+    const listenInterval = setInterval(async () => {
+      if (
+        !appState.isPlaying ||
+        !appState.currentSong ||
+        !appState.currentStation ||
+        !audioElement ||
+        audioElement.paused
+      ) {
+        return;
+      }
+
+      await fetch('/api/listen', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          fileId: appState.currentSong.fileId,
+          stationId: appState.currentStation,
+          seconds: 30,
+        }),
+      });
+    }, 30_000);
+
+    return () => clearInterval(listenInterval);
+  })
+
   $effect(() => {
     if (!audioElement) return;
     togglePlayback(appState.isPlaying);

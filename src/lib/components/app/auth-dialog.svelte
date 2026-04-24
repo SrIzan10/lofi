@@ -32,6 +32,7 @@
   let passkeyName = $state('');
   let turnstileToken = $state('');
   let resetTurnstile = $state<(() => void) | undefined>();
+  let createFormElement = $state<HTMLDivElement>();
   const turnstileSiteKey = $derived(
     dev ? '1x00000000000000000000AA' : (publicEnv.PUBLIC_TURNSTILE_SITE_KEY ?? '')
   );
@@ -114,15 +115,26 @@
     authMessage = 'Turnstile check expired. Please try again.';
   };
 
+  const getTurnstileToken = () => {
+    const formToken = createFormElement
+      ?.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')
+      ?.value
+      .trim();
+
+    return turnstileToken || formToken || '';
+  };
+
   const createAccount = async () => {
-    if (!turnstileToken) {
+    const token = getTurnstileToken();
+
+    if (!token) {
       authMessage = 'Please complete the Turnstile check before creating an account.';
       return;
     }
 
     await runAuthAction(
       'create-account',
-      () => authClient.createAccount(name, turnstileToken),
+      () => authClient.createAccount(name, token),
       'Account creation failed',
       async () => {
         await session.get().refetch();
@@ -329,7 +341,7 @@
           </Button>
         </div>
       {:else if authScreen === 'login'}
-        <div class="space-y-4">
+        <div class="space-y-4" bind:this={createFormElement}>
           <div class="space-y-2">
             <Label for="accountNumber" class="text-white/70">Account Number</Label>
             <Input
@@ -434,7 +446,7 @@
           <Button
             type="button"
             onclick={createAccount}
-            disabled={busyAction === 'create-account' || !name || !turnstileToken}
+            disabled={busyAction === 'create-account' || !name}
             class="w-full disabled:opacity-50"
           >
             {#if busyAction === 'create-account'}
