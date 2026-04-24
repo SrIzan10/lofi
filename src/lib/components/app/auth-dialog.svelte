@@ -196,7 +196,6 @@
 
     const result = await authClient.passkey.addPasskey({
       name: passkeyName,
-      authenticatorAttachment: 'platform',
     });
 
     busyAction = null;
