@@ -172,6 +172,7 @@
         !appState.isPlaying ||
         !appState.currentSong ||
         !appState.currentStation ||
+        !user ||
         user?.statisticsOptOut ||
         !audioElement ||
         audioElement.paused

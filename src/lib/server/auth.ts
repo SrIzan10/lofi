@@ -174,53 +174,54 @@ const accountNumber = () =>
     },
   }) satisfies BetterAuthPlugin;
 
-const authConfig = {
-  baseURL: env.ORIGIN,
-  secret: env.BETTER_AUTH_SECRET,
-  user: {
-    additionalFields: {
-      accountNumber: {
-        type: 'string',
-        required: true,
-        input: false,
-        unique: true,
-        fieldName: 'account_number',
-        defaultValue: generateAccountNumber,
-      },
-      statisticsOptOut: {
-        type: 'boolean',
-        required: true,
-        input: false,
-        fieldName: 'statistics_opt_out',
-        defaultValue: false,
+const createAuthConfig = (baseURL = env.ORIGIN) =>
+  ({
+    baseURL,
+    secret: env.BETTER_AUTH_SECRET,
+    user: {
+      additionalFields: {
+        accountNumber: {
+          type: 'string',
+          required: true,
+          input: false,
+          unique: true,
+          fieldName: 'account_number',
+          defaultValue: generateAccountNumber,
+        },
+        statisticsOptOut: {
+          type: 'boolean',
+          required: true,
+          input: false,
+          fieldName: 'statistics_opt_out',
+          defaultValue: false,
+        },
       },
     },
-  },
-  logger: {
-    level: 'debug',
-  },
-  onAPIError: {
-    onError(error: unknown) {
-      console.error('Better Auth API error', error);
+    logger: {
+      level: 'debug',
     },
-  },
-  plugins: [
-    anonymous({
-      generateName: () => getAnonymousDisplayName(),
-      generateRandomEmail: generateOpaqueIdentifier,
-    }),
-    accountNumber(),
-    passkey({
-      rpID: new URL(env.ORIGIN).hostname,
-      rpName: 'Chillhop',
-    }),
-    sveltekitCookies(getRequestEvent), // make sure this is the last plugin in the array
-  ],
-} satisfies Omit<Parameters<typeof betterAuth>[0], 'database'>;
+    onAPIError: {
+      onError(error: unknown) {
+        console.error('Better Auth API error', error);
+      },
+    },
+    plugins: [
+      anonymous({
+        generateName: () => getAnonymousDisplayName(),
+        generateRandomEmail: generateOpaqueIdentifier,
+      }),
+      accountNumber(),
+      passkey({
+        rpID: new URL(baseURL).hostname,
+        rpName: 'Chillhop',
+      }),
+      sveltekitCookies(getRequestEvent), // make sure this is the last plugin in the array
+    ],
+  }) satisfies Omit<Parameters<typeof betterAuth>[0], 'database'>;
 
-export const createAuth = (d1: D1Database) =>
+export const createAuth = (d1: D1Database, baseURL = env.ORIGIN) =>
   betterAuth({
-    ...authConfig,
+    ...createAuthConfig(baseURL),
     database: drizzleAdapter(getDb(d1), { provider: 'sqlite' }),
   });
 

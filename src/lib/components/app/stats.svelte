@@ -3,6 +3,9 @@
   import { state as appState } from '@/state.svelte';
   import Radio from '@lucide/svelte/icons/radio';
   import ListMusic from '@lucide/svelte/icons/list-music';
+  import { authClient } from '@/auth-client';
+
+  const session = authClient.useSession();
 
   type TopSong = {
     fileId: string;
@@ -68,7 +71,11 @@
 
       stats = await response.json();
     } catch {
-      error = 'Could not load stats.';
+      if (session) {
+        error = 'Could not load stats. Please try again later.';
+      } else {
+        error = 'Sign in to see your listening stats.';
+      }
     } finally {
       isLoading = false;
     }
