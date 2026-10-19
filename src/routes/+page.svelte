@@ -8,13 +8,24 @@
   import Title from '@/components/app/title.svelte';
   import LeftBar from '@/components/app/left-bar.svelte';
   import AuthBar from '@/components/app/auth-bar.svelte';
+  import EmbedBridge from '@/components/app/embed-bridge.svelte';
+  import EmbedPlayer from '@/components/app/embed-player.svelte';
+  import { page } from '$app/state';
+  import { isEmbed } from '@/embed';
+
+  const embed = $derived(isEmbed(page.url));
 </script>
 
-<BgImage />
-<Daemon />
-<BackgroundAnalyzer videoSelector="#bg-video" />
+{#if !embed}
+  <BgImage />
+  <BackgroundAnalyzer videoSelector="#bg-video" />
+{/if}
+<Daemon {embed} />
 
-{#if state.isLoading && !state.hasInteracted}
+{#if embed}
+  <EmbedBridge />
+  <EmbedPlayer />
+{:else if state.isLoading && !state.hasInteracted}
   <div class="flex flex-col h-screen w-full items-center justify-center space-y-2">
     <Spinner class="size-10" />
     <p>Loading...</p>

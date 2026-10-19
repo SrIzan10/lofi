@@ -9,6 +9,11 @@
   import Pomodoro from './pomodoro.svelte';
   import Stats from './stats.svelte';
   import { authClient } from '$lib';
+  import { page } from '$app/state';
+  import { getEmbedVolume } from '@/embed';
+  import Play from '@lucide/svelte/icons/play';
+
+  let { embed = false }: { embed?: boolean } = $props();
 
   const session = authClient.useSession();
   const user = $derived($session.data?.user);
@@ -58,6 +63,36 @@
     appState.isPlaying = !appState.isPlaying;
     togglePlayback(appState.isPlaying);
   };
+
+  // used by the embed api. before the first click, try to start anyway: browsers allow it when
+  // the parent page delegates autoplay to the iframe. if they don't, the click gate stays up
+  appState.play = () => {
+    if (appState.hasInteracted) {
+      appState.isPlaying = true;
+      return;
+    }
+    if (!audioElement) return;
+
+    audioElement
+      .play()
+      .then(() => {
+        appState.hasInteracted = true;
+        appState.isPlaying = true;
+      })
+      .catch(() => {});
+  };
+
+  appState.next = () => {
+    if (!appState.currentSong) return;
+    handleSongEnd();
+    if (appState.hasInteracted) appState.isPlaying = true;
+  };
+
+  function start() {
+    appState.hasInteracted = true;
+    appState.isPlaying = true;
+    togglePlayback(true);
+  }
 
   // ios safari requires a user gesture to play audio
   // please send help
@@ -110,9 +145,14 @@
     appState.backgrounds = data.backgrounds.filter(bg => bg.isActive === 1 && !bg.parentId);
     appState.atmospheres = data.atmospheres;
 
-    const storedVolume = window.localStorage.getItem('volume');
-    if (storedVolume) {
-      appState.volume = parseFloat(storedVolume);
+    if (embed) {
+      // embeds get their own volume and leave the one saved for the full site alone
+      appState.volume = getEmbedVolume(page.url);
+    } else {
+      const storedVolume = window.localStorage.getItem('volume');
+      if (storedVolume) {
+        appState.volume = parseFloat(storedVolume);
+      }
     }
 
     if (data.stations.length > 0) {
@@ -236,23 +276,34 @@
   })
 </script>
 
-{#if !appState.hasInteracted}
+{#if !appState.hasInteracted && !embed}
   <button
     class="flex flex-col h-screen w-full items-center justify-center space-y-2 cursor-pointer"
-    onclick={() => {
-      appState.hasInteracted = true;
-      togglePlayback(true);
-    }}
+    onclick={start}
   >
     <p>Click anywhere on the screen</p>
+  </button>
+{:else if !appState.hasInteracted && embed && !appState.isLoading && !appState.error}
+  <!-- compact version of the gate for embeds, shown over the player -->
+  <button
+    class="dark fixed inset-0 z-50 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-sm cursor-pointer"
+    onclick={start}
+  >
+    <span
+      class="flex size-12 items-center justify-center rounded-full border border-neutral-600/30 bg-foreground/20 shadow-lg"
+    >
+      <Play class="size-5" />
+    </span>
+    <p class="text-sm">Click to play</p>
   </button>
 {/if}
 
 {#if !appState.isLoading}
+  <!-- only autoplay while playing, so skipping or switching songs while paused stays paused -->
   <audio
     bind:this={audioElement}
-    src={appState.currentSong!.endpoint}
-    autoplay
+    src={appState.currentSong?.endpoint}
+    autoplay={appState.hasInteracted && appState.isPlaying}
     volume={appState.volume}
     ontimeupdate={checkTimeAndPrepareNextSong}
     onended={handleSongEnd}
