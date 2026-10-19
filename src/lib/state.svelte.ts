@@ -41,4 +41,6 @@ export const state = $state({
 
   // in daemon.svelte
   togglePlay: (() => {}) as () => void,
+  play: (() => {}) as () => void,
+  next: (() => {}) as () => void,
 });
