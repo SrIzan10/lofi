@@ -15,7 +15,6 @@
 
   // compact player for `?embed=1`, made to fit iframes from around 320x200
 
-  const station = $derived(appState.stations.find((s) => s.id === appState.currentStation));
   const background = $derived(
     appState.backgrounds.find((bg) => bg.id === appState.currentBackgroundId)
   );
@@ -48,7 +47,7 @@
           class="flex min-w-0 items-center gap-1.5 rounded-lg bg-foreground/10 px-2.5 py-1.5 text-xs font-medium shadow-lg backdrop-blur-lg"
         >
           <Radio class="size-3.5 shrink-0" />
-          <span class="truncate">{station?.name}</span>
+          <span class="truncate">lofi.srizan.dev</span>
         </div>
         <Button
           href="/"
